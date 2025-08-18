@@ -4,6 +4,8 @@ const express = require("express");
 const app = express();
 
 const authRouter = require("./routes/auth");
+console.log("JWT_SECRET:", !!process.env.JWT_SECRET); // prints true/false
+console.log("JWT_SECRET:", process.env.JWT_SECRET);
 
 // error handler
 const notFoundMiddleware = require("./middleware/not-found");

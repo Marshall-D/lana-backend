@@ -2,6 +2,8 @@ require("dotenv").config();
 require("express-async-errors");
 const express = require("express");
 const app = express();
+const cors = require("cors");
+app.use(cors()); // dev: allows requests from your phone
 
 const authRouter = require("./routes/auth");
 console.log("JWT_SECRET:", !!process.env.JWT_SECRET); // prints true/false
@@ -31,8 +33,9 @@ const start = async () => {
   try {
     await connectDB(process.env.MONGO_URI);
 
-    app.listen(port, () =>
-      console.log(`Server is listening on port ${port}...`)
+    const port = process.env.PORT || 3000;
+    app.listen(port, "0.0.0.0", () =>
+      console.log(`Server is listening on http://0.0.0.0:${port}`)
     );
   } catch (error) {
     console.log(error);

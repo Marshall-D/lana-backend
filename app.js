@@ -7,7 +7,7 @@ app.use(cors()); // dev: allows requests from your phone
 
 const authRouter = require("./routes/auth");
 console.log("JWT_SECRET:", !!process.env.JWT_SECRET); // prints true/false
-console.log("JWT_SECRET:", process.env.JWT_SECRET);
+// console.log("JWT_SECRET:", process.env.JWT_SECRET);
 
 // error handler
 const notFoundMiddleware = require("./middleware/not-found");

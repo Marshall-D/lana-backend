@@ -48,6 +48,19 @@ UserSchema.methods.createJWT = function () {
   );
 };
 
+/** Long-lived refresh token (JWT). Prefer JWT_REFRESH_SECRET in production; falls back to JWT_SECRET. */
+UserSchema.methods.createRefreshJWT = function () {
+  const secret =
+    process.env.JWT_REFRESH_SECRET || process.env.JWT_SECRET;
+  return jwt.sign(
+    { userId: this._id.toString(), tokenUse: "refresh" },
+    secret,
+    {
+      expiresIn: process.env.JWT_REFRESH_LIFETIME || "7d",
+    }
+  );
+};
+
 UserSchema.methods.comparePassword = async function (candidatePassword) {
   const isMatch = await bcrypt.compare(candidatePassword, this.password);
   return isMatch;

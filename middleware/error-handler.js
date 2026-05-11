@@ -27,7 +27,10 @@ const errorHandlerMiddleware = (err, req, res, next) => {
     customError.statusCode = 404;
   }
 
-  return res.status(customError.statusCode).json({ msg: customError.msg });
+  return res.status(customError.statusCode).json({
+    msg: customError.msg,
+    message: customError.msg,
+  });
 };
 
 module.exports = errorHandlerMiddleware;

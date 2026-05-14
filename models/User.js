@@ -39,25 +39,14 @@ UserSchema.pre("save", async function (next) {
 });
 
 UserSchema.methods.createJWT = function () {
+  const expiresIn =
+    process.env.JWT_ACCESS_EXPIRES ||
+    process.env.JWT_LIFETIME ||
+    "15m";
   return jwt.sign(
-    { userId: this._id, name: this.name },
+    { userId: this._id.toString(), name: this.name },
     process.env.JWT_SECRET,
-    {
-      expiresIn: process.env.JWT_LIFETIME,
-    }
-  );
-};
-
-/** Long-lived refresh token (JWT). Prefer JWT_REFRESH_SECRET in production; falls back to JWT_SECRET. */
-UserSchema.methods.createRefreshJWT = function () {
-  const secret =
-    process.env.JWT_REFRESH_SECRET || process.env.JWT_SECRET;
-  return jwt.sign(
-    { userId: this._id.toString(), tokenUse: "refresh" },
-    secret,
-    {
-      expiresIn: process.env.JWT_REFRESH_LIFETIME || "7d",
-    }
+    { expiresIn }
   );
 };
 

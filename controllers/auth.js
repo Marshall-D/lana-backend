@@ -1,9 +1,52 @@
 // controllers/auth.js
 
+const jwt = require("jsonwebtoken");
 const User = require("../models/User");
 const { StatusCodes } = require("http-status-codes");
-const { BadRequestError, UnauthenticatedError } = require("../errors");
+const {
+  BadRequestError,
+  UnauthenticatedError,
+  NotFoundError,
+} = require("../errors");
 const refreshTokenService = require("../services/refreshTokenService");
+
+const RESET_TOKEN_PURPOSE = "password-reset";
+
+function getResetJwtSecret() {
+  return process.env.JWT_RESET_SECRET || process.env.JWT_SECRET;
+}
+
+function getResetTokenExpiresIn() {
+  return process.env.JWT_RESET_EXPIRES || "15m";
+}
+
+function createPasswordResetToken(userId) {
+  const secret = getResetJwtSecret();
+  if (!secret) {
+    throw new Error("JWT_RESET_SECRET or JWT_SECRET must be set");
+  }
+  return jwt.sign(
+    { userId: userId.toString(), purpose: RESET_TOKEN_PURPOSE },
+    secret,
+    { expiresIn: getResetTokenExpiresIn() }
+  );
+}
+
+function verifyPasswordResetToken(resetToken) {
+  const secret = getResetJwtSecret();
+  if (!secret) {
+    return null;
+  }
+  try {
+    const payload = jwt.verify(resetToken, secret);
+    if (payload.purpose !== RESET_TOKEN_PURPOSE || !payload.userId) {
+      return null;
+    }
+    return payload;
+  } catch {
+    return null;
+  }
+}
 
 /** Same shape as login/register — canonical for startup validation (LANA-105). */
 function toPublicUser(user) {
@@ -128,6 +171,61 @@ const logout = async (req, res) => {
   res.status(StatusCodes.OK).json({ success: true });
 };
 
+/**
+ * POST /api/v1/auth/forgot-password — verify email exists; issue short-lived reset token (no OTP/email yet).
+ * Body: { email }. 404 if email not in database.
+ */
+const forgotPassword = async (req, res) => {
+  const { email } = req.body;
+
+  if (!email || typeof email !== "string") {
+    throw new BadRequestError("Please provide email");
+  }
+
+  const normalizedEmail = email.trim().toLowerCase();
+  const user = await User.findOne({ email: normalizedEmail });
+  if (!user) {
+    throw new NotFoundError("Email does not exist");
+  }
+
+  const resetToken = createPasswordResetToken(user._id);
+  res.status(StatusCodes.OK).json({ success: true, resetToken });
+};
+
+/**
+ * POST /api/v1/auth/reset-password — set new password using reset token from forgot-password.
+ * Body: { resetToken, newPassword }. Revokes all refresh sessions for the user.
+ */
+const resetPassword = async (req, res) => {
+  const { resetToken, newPassword } = req.body;
+
+  if (!resetToken || typeof resetToken !== "string") {
+    throw new BadRequestError("Please provide resetToken");
+  }
+  if (!newPassword || typeof newPassword !== "string") {
+    throw new BadRequestError("Please provide newPassword");
+  }
+  if (newPassword.length < 6) {
+    throw new BadRequestError("Password must be at least 6 characters");
+  }
+
+  const payload = verifyPasswordResetToken(resetToken);
+  if (!payload) {
+    throw new UnauthenticatedError("Invalid or expired reset token");
+  }
+
+  const user = await User.findById(payload.userId);
+  if (!user) {
+    throw new NotFoundError("User not found");
+  }
+
+  user.password = newPassword;
+  await user.save();
+  await refreshTokenService.revokeAllForUser(user._id);
+
+  res.status(StatusCodes.OK).json({ success: true });
+};
+
 module.exports = {
   register,
   login,
@@ -135,4 +233,6 @@ module.exports = {
   getMe,
   revoke,
   logout,
+  forgotPassword,
+  resetPassword,
 };

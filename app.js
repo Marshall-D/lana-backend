@@ -16,6 +16,10 @@ const authRouter = require("./routes/auth");
 
 // useful checks (don't log secrets themselves)
 console.log("JWT_SECRET present:", !!process.env.JWT_SECRET);
+console.log(
+  "JWT_RESET_SECRET present:",
+  !!(process.env.JWT_RESET_SECRET || process.env.JWT_SECRET)
+);
 console.log("MONGO_URI present:", !!process.env.MONGO_URI);
 
 // error handler

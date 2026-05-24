@@ -13,6 +13,7 @@ app.use(xss());
 app.use(cors());
 
 const authRouter = require("./routes/auth");
+const meRouter = require("./routes/me");
 
 // useful checks (don't log secrets themselves)
 console.log("JWT_SECRET present:", !!process.env.JWT_SECRET);
@@ -36,6 +37,7 @@ app.get("/", (req, res) => {
 });
 
 app.use("/api/v1/auth", authRouter);
+app.use("/api/v1/me", meRouter);
 
 app.use(notFoundMiddleware);
 app.use(errorHandlerMiddleware);

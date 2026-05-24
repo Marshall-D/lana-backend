@@ -9,6 +9,7 @@ const {
   NotFoundError,
 } = require("../errors");
 const refreshTokenService = require("../services/refreshTokenService");
+const { toPublicUser } = require("../utils/publicUser");
 
 const RESET_TOKEN_PURPOSE = "password-reset";
 
@@ -46,15 +47,6 @@ function verifyPasswordResetToken(resetToken) {
   } catch {
     return null;
   }
-}
-
-/** Same shape as login/register — canonical for startup validation (LANA-105). */
-function toPublicUser(user) {
-  return {
-    id: user._id.toString(),
-    email: user.email,
-    name: user.name,
-  };
 }
 
 async function buildAuthResponse(user, deviceId = null) {
@@ -120,18 +112,6 @@ const refresh = async (req, res) => {
     refreshToken,
     user: toPublicUser(user),
   });
-};
-
-/**
- * GET /api/v1/auth/me — validate Bearer access JWT + return user snapshot.
- * Canonical URL for useStartup / validateWithServer until GET /api/v1/me exists (LANA-201).
- */
-const getMe = async (req, res) => {
-  const user = await User.findById(req.user.userId).select("-password");
-  if (!user) {
-    throw new UnauthenticatedError("Authentication invalid");
-  }
-  res.status(StatusCodes.OK).json({ user: toPublicUser(user) });
 };
 
 /**
@@ -230,7 +210,6 @@ module.exports = {
   register,
   login,
   refresh,
-  getMe,
   revoke,
   logout,
   forgotPassword,

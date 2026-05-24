@@ -8,7 +8,6 @@ const {
   register,
   login,
   refresh,
-  getMe,
   revoke,
   logout,
   forgotPassword,
@@ -29,7 +28,6 @@ router.post("/login", login);
 router.post("/forgot-password", passwordResetLimiter, forgotPassword);
 router.post("/reset-password", passwordResetLimiter, resetPassword);
 router.post("/refresh", refresh);
-router.get("/me", auth, getMe);
 // Revoke refresh session without Bearer (e.g. access expired, client skips refresh before sign-out)
 router.post("/revoke", revoke);
 router.post("/logout", auth, logout);

@@ -14,6 +14,11 @@ app.use(cors());
 
 const authRouter = require("./routes/auth");
 const meRouter = require("./routes/me");
+const walletRouter = require("./routes/wallet");
+const tasksRouter = require("./routes/tasks");
+const frensRouter = require("./routes/frens");
+const earnRouter = require("./routes/earn");
+const claimRouter = require("./routes/claim");
 
 // useful checks (don't log secrets themselves)
 console.log("JWT_SECRET present:", !!process.env.JWT_SECRET);
@@ -33,11 +38,16 @@ const connectDB = require("./db/connect");
 
 // routes
 app.get("/", (req, res) => {
-  res.send("jobs api");
+  res.json({ service: "lana-api", status: "ok" });
 });
 
 app.use("/api/v1/auth", authRouter);
 app.use("/api/v1/me", meRouter);
+app.use("/api/v1/wallet", walletRouter);
+app.use("/api/v1/tasks", tasksRouter);
+app.use("/api/v1/frens", frensRouter);
+app.use("/api/v1/earn", earnRouter);
+app.use("/api/v1/claim", claimRouter);
 
 app.use(notFoundMiddleware);
 app.use(errorHandlerMiddleware);

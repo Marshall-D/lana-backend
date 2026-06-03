@@ -13,8 +13,15 @@ npm install && npm start
 
 #### Routers
 
-- auth.js
-- jobs.js
+- `routes/auth.js` — public auth (register, login, refresh, revoke, password reset); `logout` requires Bearer
+- `routes/me.js`, `wallet.js`, `tasks.js`, `frens.js`, `earn.js`, `claim.js` — JWT required on all routes (`createProtectedRouter`)
+- New user APIs: add routes under a protected router; do not mount without auth
+
+| Mount | Auth | Status |
+|-------|------|--------|
+| `/api/v1/auth` | Per-route | Live (except logout = Bearer required) |
+| `/api/v1/me` | Router-level JWT | Live |
+| `/api/v1/wallet`, `/tasks`, `/frens`, `/earn`, `/claim` | Router-level JWT | Stub `501` until feature tickets |
 
 #### User Model
 
@@ -55,15 +62,6 @@ Email Validation Regex
 - xss-clean
 - express-rate-limit
 
-Swagger UI
+#### Health
 
-```yaml
-/jobs/{id}:
-  parameters:
-    - in: path
-      name: id
-      schema:
-        type: string
-      required: true
-      description: the job id
-```
+- `GET /` — `{ "service": "lana-api", "status": "ok" }`

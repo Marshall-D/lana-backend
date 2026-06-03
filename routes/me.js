@@ -1,11 +1,11 @@
-const express = require("express");
-const router = express.Router();
-const auth = require("../middleware/authentication");
+const createProtectedRouter = require("./createProtectedRouter");
 const validate = require("../middleware/validate");
 const { patchMeSchema } = require("../validators/me");
 const { getMe, patchMe } = require("../controllers/me");
 
-router.get("/", auth, getMe);
-router.patch("/", auth, validate(patchMeSchema), patchMe);
+const router = createProtectedRouter();
+
+router.get("/", getMe);
+router.patch("/", validate(patchMeSchema), patchMe);
 
 module.exports = router;

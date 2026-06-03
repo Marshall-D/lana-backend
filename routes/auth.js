@@ -1,4 +1,6 @@
 // routes/auth.js
+// Public auth endpoints — do not apply router-level auth on this mount.
+// Protected: POST /logout only (per-route auth).
 
 const express = require("express");
 const rateLimit = require("express-rate-limit");

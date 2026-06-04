@@ -65,3 +65,20 @@ Email Validation Regex
 #### Health
 
 - `GET /` — `{ "service": "lana-api", "status": "ok" }`
+
+#### Error responses
+
+All API errors use a standard JSON envelope:
+
+```json
+{
+  "success": false,
+  "message": "Human-readable summary",
+  "code": "VALIDATION_ERROR",
+  "errors": [{ "field": "email", "message": "Please provide a valid email" }]
+}
+```
+
+- `errors` — optional per-field list (validation, duplicates)
+- `code` — machine-readable (`DUPLICATE_EMAIL`, `VALIDATION_ERROR`, `UNAUTHORIZED`, etc.)
+- Duplicate register: **409** with `DUPLICATE_EMAIL` or `DUPLICATE_NAME`

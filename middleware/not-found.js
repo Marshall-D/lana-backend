@@ -1,3 +1,10 @@
-const notFound = (req, res) => res.status(404).send('Route does not exist')
+const { StatusCodes } = require("http-status-codes");
+const { sendError } = require("../utils/errorResponse");
 
-module.exports = notFound
+const notFound = (req, res) =>
+  sendError(res, StatusCodes.NOT_FOUND, {
+    message: "Route does not exist",
+    code: "ROUTE_NOT_FOUND",
+  });
+
+module.exports = notFound;

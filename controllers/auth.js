@@ -63,13 +63,9 @@ async function buildAuthResponse(user, deviceId = null) {
 
 const register = async (req, res) => {
   const deviceId = req.body.deviceId || null;
-  const payload = {
-    ...req.body,
-    email: req.body.email ? req.body.email.trim().toLowerCase() : undefined,
-  };
-  delete payload.deviceId;
+  const { name, email, password } = req.body;
 
-  const user = await User.create(payload);
+  const user = await User.create({ name, email, password });
   const body = await buildAuthResponse(user, deviceId);
   res.status(StatusCodes.CREATED).json(body);
 };

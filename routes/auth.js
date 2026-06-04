@@ -6,6 +6,8 @@ const express = require("express");
 const rateLimit = require("express-rate-limit");
 const router = express.Router();
 const auth = require("../middleware/authentication");
+const validate = require("../middleware/validate");
+const { registerSchema } = require("../validators/auth");
 const {
   register,
   login,
@@ -20,12 +22,13 @@ const passwordResetLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 10,
   message: {
-    msg: "Too many password reset requests, please try again later",
+    success: false,
     message: "Too many password reset requests, please try again later",
+    code: "RATE_LIMITED",
   },
 });
 
-router.post("/register", register);
+router.post("/register", validate(registerSchema), register);
 router.post("/login", login);
 router.post("/forgot-password", passwordResetLimiter, forgotPassword);
 router.post("/reset-password", passwordResetLimiter, resetPassword);
